@@ -24,7 +24,10 @@ public class PrisonersDilemma {
     boolean invalidInput = true;
     boolean grimTriggered;
     boolean playerWin;
-
+    int playerCooperateTally = 0;
+    int playerDefectTally = 0;
+    int AICooperateTally = 0;
+    int AIDefectTally = 0;
     public PrisonersDilemma() {
         clearScreen();
 
@@ -142,6 +145,27 @@ public class PrisonersDilemma {
         // After game is finished - show results, history, and stats
         gameResults(); // show who won, and show final score
         showHistory(rounds-1); // show round history
+        showStats(); // show stats
+    }
+    
+    public void showStats() {
+        clearScreen();
+        
+        System.out.println("┌───────────────────  STATS  ───────────────────┐");
+        System.out.println("Rounds played: " + rounds);
+        System.out.println("Your score: " + playerPointsRealtime);
+        System.out.println("The AI's score: " + AIPointsRealtime);
+        System.out.println("────────────────────────────────────────────────");
+        System.out.println("You cooperated " + playerCooperateTally + " times.");
+        System.out.println("You defected " + playerDefectTally + " times.");
+        System.out.println("The AI cooperated " + AICooperateTally + " times.");
+        System.out.println("The AI defected " + AIDefectTally + " times.");
+        System.out.println("────────────────────────────────────────────────");
+        System.out.println("You scored an average of " + (playerPointsRealtime/rounds) + " points per round.");
+        System.out.println("The AI scored an average of " + (AIPointsRealtime/rounds) + " points per round.");
+        System.out.println("└───────────────────────────────────────────────┘");
+        
+        userContinuer();
     }
 
     public void gameResults() {
@@ -177,37 +201,41 @@ public class PrisonersDilemma {
 
     public void pointsCalculator(int x) {
         if (playerHistory[x].equals("c")) {
+            playerCooperateTally++;
             if (AIHistory[x].equals("c")) {
                 // if both cooperate, 3 points to each
                 playerPointsHistory[x] = 3;
                 AIPointsHistory[x] = 3;
                 playerPointsRealtime +=3;
                 AIPointsRealtime +=3;
+                AICooperateTally++;
             } else {
                 // if player cooperates and ai defects, 0 points to player, 5 points to ai
                 playerPointsHistory[x] = 0;
                 AIPointsHistory[x] = 5;
                 playerPointsRealtime +=0;
                 AIPointsRealtime +=5;
+                AIDefectTally++;
             }
         }
 
         if (playerHistory[x].equals("d")) {
+            playerDefectTally++;
             if (AIHistory[x].equals("d")) {
                 // if both defect, 1 point to each
                 playerPointsHistory[x] = 1;
                 AIPointsHistory[x] = 1;
                 playerPointsRealtime +=1;
                 AIPointsRealtime +=1;
+                AIDefectTally++;
             } else {
                 // if player defects and ai cooperates, 5 points to player, 0 points to ai
                 playerPointsHistory[x] = 5;
                 AIPointsHistory[x] = 0;
                 playerPointsRealtime +=5;
                 AIPointsRealtime +=0;
+                AICooperateTally++;
             }
-        } else {
-
         }
     }
 
