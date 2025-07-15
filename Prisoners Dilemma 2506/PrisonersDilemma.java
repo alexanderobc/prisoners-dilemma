@@ -12,7 +12,6 @@ import java.util.Random;
 public class PrisonersDilemma {
 
     Scanner keyboard = new Scanner(System.in); // Initialize scanner for user input
-    int homeScreenLength = 0;
     int AIStrategy;
     int rounds;
     int playerPointsRealtime;
@@ -28,17 +27,30 @@ public class PrisonersDilemma {
     int playerDefectTally = 0;
     int AICooperateTally = 0;
     int AIDefectTally = 0;
+
     public PrisonersDilemma() {
+    run();
+    }
+
+    public void run() {
+        do {
+            clearScreen();
+
+            // Step 1 - Print Homescreen
+            homeScreen();
+
+            // Step 2 - Setup (Choose AI Strategy, number of rounds)
+            setup();
+
+            // Step 3 -  Start Game
+            startGame();
+
+            // Step 4 - Ask if they want to replay the game
+
+        } while(gameReplayer() == true);
+
         clearScreen();
-
-        // Step 1 - Print Homescreen
-        homeScreen();
-
-        // Step 2 - Setup (Choose AI Strategy, number of rounds)
-        setup();
-
-        // Step 3 -  Start Game
-        startGame();
+        System.out.println("Thanks for playing!");
     }
 
     public void homeScreen() {
@@ -68,8 +80,7 @@ public class PrisonersDilemma {
 
         while (invalidInput) { // if invalid input, reprint and let the user try again
             instructions();
-        }
-        invalidInput = true;  
+        } 
     }
 
     public void setup() {
@@ -146,11 +157,42 @@ public class PrisonersDilemma {
         gameResults(); // show who won, and show final score
         showHistory(rounds-1); // show round history
         showStats(); // show stats
+
+        // Ask user if they want to play another round
+
     }
-    
+
+    public boolean gameReplayer() {
+        System.out.println("Would you like to play another game?");
+        System.out.println("[y] - Yes");
+        System.out.println("[n] - No");
+        System.out.println();
+
+        invalidInput = true;
+        while(invalidInput) {
+            try {
+                String userInput = keyboard.nextLine().trim().toLowerCase();
+                if (userInput.equals("y")) { 
+                    // restart game
+                    return true;
+                } else if (userInput.equals("n")) {
+                    return false;
+                } else { // if text input other than y or n
+                    clearScreen();
+                    System.out.println("Invalid entry.");
+                }
+            } catch (Exception e) { // if invalid input (such as a number)
+                clearScreen();
+                System.out.println("Invalid entry.");
+                keyboard.nextLine(); // clear buffer
+            }
+        }
+        return true;
+    }
+
     public void showStats() {
         clearScreen();
-        
+
         System.out.println("┌───────────────────  STATS  ───────────────────┐");
         System.out.println("Rounds played: " + rounds);
         System.out.println("Your score: " + playerPointsRealtime);
@@ -164,7 +206,7 @@ public class PrisonersDilemma {
         System.out.println("You scored an average of " + (playerPointsRealtime/rounds) + " points per round.");
         System.out.println("The AI scored an average of " + (AIPointsRealtime/rounds) + " points per round.");
         System.out.println("└───────────────────────────────────────────────┘");
-        
+
         userContinuer();
     }
 
