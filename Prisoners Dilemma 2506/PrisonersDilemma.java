@@ -104,8 +104,7 @@ public class PrisonersDilemma {
 
             while (!moveChosen) { // Step 1 - Prompt until we get a valid move (c or d)
                 clearScreen();
-                System.out.println(AIStrategy);
-                System.out.println("Round " + round + ":");
+                System.out.println("Round " + (round+1) + ":");
                 System.out.println();
                 System.out.println("Commands:");
                 System.out.println("[g] - Game Theory");
@@ -136,8 +135,11 @@ public class PrisonersDilemma {
                     System.out.println();
                     System.out.println("[y] = Yes, I want to quit");
                     System.out.println("[any other key] = No, I want to keep playing");
+                    String quitResponse = keyboard.nextLine().trim().toLowerCase();
 
-                    if (keyboard.nextLine().toLowerCase().equals("y")) { // check player is sure
+                    if (quitResponse.equals("y")) { // check player is sure
+                        clearScreen();
+                        System.out.println("Thanks for playing :)");
                         System.exit(0);
                     }
                 } else {
@@ -362,17 +364,17 @@ public class PrisonersDilemma {
             System.out.println("Round History:");
             System.out.println();
             for(int x=0; x<=round; x++ ) { // loop through played rounds
-                System.out.println("Round " + x + ":");
-                if(playerHistory[round].equals("c")) { // player history
+                System.out.println("Round " + (x+1) + ":");
+                if(playerHistory[x].equals("c")) { // player history
                     System.out.println("You cooperated: " + "+" + playerPointsHistory[x] + " points"); // if player cooperated
                 } else {
                     System.out.println("You defected: " + "+" + playerPointsHistory[x] + " points"); // if player defected
                 }
 
                 if(AIHistory[x].equals("c")) { // ai history
-                    System.out.println("The AI cooperated: " + "+" + playerPointsHistory[x] + " points"); // if ai cooperated
+                    System.out.println("The AI cooperated: " + "+" + AIPointsHistory[x] + " points"); // if ai cooperated
                 } else {
-                    System.out.println("The AI defected: " + "+" + playerPointsHistory[x] + " points"); // if player defected
+                    System.out.println("The AI defected: " + "+" + AIPointsHistory[x] + " points"); // if player defected
                 }
                 System.out.println();
             }
