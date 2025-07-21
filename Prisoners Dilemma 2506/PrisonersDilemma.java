@@ -29,7 +29,7 @@ public class PrisonersDilemma {
     int AIDefectTally = 0;
 
     public PrisonersDilemma() {
-    run();
+        run();
     }
 
     public void run() {
@@ -146,9 +146,31 @@ public class PrisonersDilemma {
             }
 
             // Step 2 - process the chosen move
-            playerHistory[round] = userInput;
-            AIChooser(round);
-            pointsCalculator(round);
+            playerHistory[round] = userInput; // take user input
+            
+            // check for consistent defecting
+            boolean consistentDefecting = false;
+            if(round>4) { // if round 4 has passed
+                for(int x=0; x<4; x++) { // loop through the past 4 rounds
+                    if(playerHistory[x].equals("d")) {
+                        // if player defected, set boolean to true
+                        consistentDefecting = true;
+                    } else {
+                        // if player cooperated, set boolean to false and fall out of loop
+                        consistentDefecting = false;
+                        x=4;
+                    }
+                }
+            }
+
+            if(consistentDefecting == true) {
+                // if player has consistently defected
+                AIHistory[round] = "d";
+            } else {
+                // otherwise, ask the ai what move to play
+                AIChooser(round);
+            }
+            pointsCalculator(round); // calculate points
 
             // Step 3 - show round results
             roundComplete(round);
