@@ -85,7 +85,7 @@ public class PrisonersDilemma {
 
     public void setup() {
         Random random = new Random();
-        AIStrategy = random.nextInt(4); // choose AI based on a random number (gives 0-3)
+        AIStrategy = 1; //random.nextInt(4); // choose AI based on a random number (gives 0-3)
         /* 0 = Always defect
          * 1 = Always cooperate
          * 2 = Tit-for-tat
@@ -128,7 +128,7 @@ public class PrisonersDilemma {
                     instructions();
                 } else if (userInput.equals("h")) {
                     clearScreen();
-                    showHistory(round - 1);
+                    showHistory(round);
                 } else if (userInput.equals("q")) {
                     clearScreen();
                     System.out.println("Are you sure you want to quit?");
@@ -153,8 +153,8 @@ public class PrisonersDilemma {
             // check for consistent defecting
             boolean consistentDefecting = false;
             if(round>4) { // if round 4 has passed
-                for(int x=0; x<4; x++) { // loop through the past 4 rounds
-                    if(playerHistory[x].equals("d")) {
+                for(int x=1; x<=4; x++) { // loop through the past 4 rounds
+                    if(playerHistory[round-x].equals("d")) {
                         // if player defected, set boolean to true
                         consistentDefecting = true;
                     } else {
@@ -164,6 +164,8 @@ public class PrisonersDilemma {
                     }
                 }
             }
+            
+            
 
             if(consistentDefecting == true) {
                 // if player has consistently defected
@@ -363,7 +365,7 @@ public class PrisonersDilemma {
         } else {
             System.out.println("Round History:");
             System.out.println();
-            for(int x=0; x<=round; x++ ) { // loop through played rounds
+            for(int x=0; x<round; x++ ) { // loop through played rounds
                 System.out.println("Round " + (x+1) + ":");
                 if(playerHistory[x].equals("c")) { // player history
                     System.out.println("You cooperated: " + "+" + playerPointsHistory[x] + " points"); // if player cooperated
