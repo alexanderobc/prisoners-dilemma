@@ -3,7 +3,7 @@
  * Prisoner's Dilemma
  *
  * @author Alex Brook Conway
- * @version 14/07/25
+ * @version 05/08/25
  */
 
 import java.util.Scanner; // Keyboard input
@@ -13,15 +13,16 @@ public class PrisonersDilemma {
 
     Scanner keyboard = new Scanner(System.in); // Initialize scanner for user input
     int AIStrategy;
-    int rounds;
+    int totalRounds;
+    int roundsPlayed = 0;
     int playerPointsRealtime;
     int AIPointsRealtime;
     String[] playerHistory;
     String[] AIHistory;
     int[] playerPointsHistory;
     int[] AIPointsHistory;
-    boolean invalidInput = true;
     boolean grimTriggered;
+    boolean playerDefectedLastTwo;
     int playerCooperateTally = 0;
     int playerDefectTally = 0;
     int AICooperateTally = 0;
@@ -57,57 +58,59 @@ public class PrisonersDilemma {
 
     public void homeScreen() {
         // run user through game info
-        invalidInput = true;
-        while(invalidInput) { // if invalid input, reprint and let the user try again
-            System.out.println("Welcome to a Prisoner's Dilemma recreation!");
-            System.out.println();
-            System.out.println("The Prisoner's Dilemma is a classic example in game theory where two players must choose to cooperate or betray, ");
-            System.out.println("with outcomes depending on the combination of their choices—highlighting the conflict between individual gain and mutual benefit.");
-            userContinuer(); // get continuation prompt from user
-        }
-        invalidInput= true;
+        System.out.println("Welcome to a Prisoner's Dilemma recreation!");
+        System.out.println();
+        System.out.println("This is a simple, text-based activity about choices and trust.");
+        System.out.println("You play against an AI opponent over several short rounds.");
+        System.out.println("Each round you choose to cooperate or to defect.");
+        System.out.println("After both choices are made, you will see the outcome and points.");
+        userContinuer(); // get continuation prompt from user
 
-        while(invalidInput) { // if invalid input, reprint and let the user try again
-            System.out.println("Disclaimer");
-            System.out.println();
-            System.out.println("This game is completely fictional, and any mentions of prison or");
-            System.out.println("the justice system are abstract and not intended to be representative of the world we live in.");
-            userContinuer(); // get continuation prompt from user
-        }
-        invalidInput = true;
+        System.out.println("Disclaimer");
+        System.out.println();
+        System.out.println("This game is completely fictional, and any mentions of prison or");
+        System.out.println("the justice system are abstract and not intended to be representative of the world we live in.");
+        userContinuer(); // get continuation prompt from user
 
-        while(invalidInput) { // if invalid input, reprint and let the user try again
-            gameTheory();
-        }
-        invalidInput = true;
+        gameTheory();
 
-        while (invalidInput) { // if invalid input, reprint and let the user try again
-            instructions();
-        } 
+        instructions();
     }
 
     public void setup() {
         Random random = new Random();
-        AIStrategy = random.nextInt(4); // choose AI based on a random number (gives 0-3)
+        AIStrategy = random.nextInt(6); // choose AI based on a random number (gives 0-5)
         /* 0 = Always defect
          * 1 = Always cooperate
          * 2 = Tit-for-tat
-         * 3 = Grim trigger */
-        rounds =  (int)(Math.random() * (15 - 5 + 1)) + 5; // set random number of rounds between 5-15
-        playerHistory = new String[rounds];
-        AIHistory = new String[rounds];
-        playerPointsHistory = new int[rounds];
-        AIPointsHistory  = new int[rounds];
+         * 3 = Grim trigger
+         * 4 = Win–Stay, Lose–Shift
+         * 5 = Tit-for-Two-Tats */
+        totalRounds =  (int)(Math.random() * (15 - 5 + 1)) + 5; // set random number of rounds between 5-15
+        playerHistory = new String[totalRounds];
+        AIHistory = new String[totalRounds];
+        playerPointsHistory = new int[totalRounds];
+        AIPointsHistory  = new int[totalRounds];
     }
 
     public void startGame() {
-        for (int round = 0; round < rounds; round++) {
+        for (int round = 0; round < totalRounds; round++) {
             boolean moveChosen = false;
             String userInput = "";
 
             clearScreen();
             while (!moveChosen) { // Step 1 - Prompt until we get a valid move (c or d)
                 System.out.println("Round " + (round+1) + ":");
+                if(round != 0) { // if its not the first round, print the realtime score
+                    System.out.println();
+                    if (playerPointsRealtime>AIPointsRealtime) {
+                        System.out.println("You currently lead by " + playerPointsRealtime + "-" + AIPointsRealtime);
+                    } else if (playerPointsRealtime<AIPointsRealtime) {
+                        System.out.println("You are currently losing by " + AIPointsRealtime + "-" + playerPointsRealtime);
+                    } else {
+                        System.out.println("It's currently a draw! " + playerPointsRealtime + "-" + AIPointsRealtime);
+                    }
+                }
                 System.out.println();
                 System.out.println("Commands:");
                 System.out.println("[g] - Game Theory");
@@ -133,7 +136,7 @@ public class PrisonersDilemma {
                     instructions();
                 } else if (userInput.equals("h")) {
                     clearScreen();
-                    showHistory(round);
+                    showHistory(roundsPlayed);
                 } else if (userInput.equals("q")) {
                     clearScreen();
                     System.out.println("Are you sure you want to quit?");
@@ -183,16 +186,17 @@ public class PrisonersDilemma {
             // Step 3 - show round results
             clearScreen();
             roundComplete(round);
+            roundsPlayed++;
         }
         // After game is finished - show results, history, and stats
         gameResults(); // show who won, and show final score
-        showHistory(rounds); // show round history
+        showHistory(roundsPlayed); // show round history
         clearScreen();
         showStats(); // show stats
     }
 
     public boolean gameReplayer() {
-        invalidInput = true;
+        boolean invalidInput = true;
         while(invalidInput) {
             System.out.println("Would you like to play another game?");
             System.out.println("[y] - Yes");
@@ -221,23 +225,26 @@ public class PrisonersDilemma {
     }
 
     public void showStats() {
-        while(true) {
-            System.out.println("┌───────────────────  STATS  ───────────────────┐");
-            System.out.println("Rounds played: " + rounds);
-            System.out.println("Your score: " + playerPointsRealtime);
-            System.out.println("The AI's score: " + AIPointsRealtime);
-            System.out.println("────────────────────────────────────────────────");
-            System.out.println("You cooperated " + playerCooperateTally + " times.");
-            System.out.println("You defected " + playerDefectTally + " times.");
-            System.out.println("The AI cooperated " + AICooperateTally + " times.");
-            System.out.println("The AI defected " + AIDefectTally + " times.");
-            System.out.println("────────────────────────────────────────────────");
-            System.out.println("You scored an average of " + ((double)playerPointsRealtime/rounds) + " points per round.");
-            System.out.println("The AI scored an average of " + ((double)AIPointsRealtime/rounds) + " points per round.");
-            System.out.println("└───────────────────────────────────────────────┘");
+        System.out.println("┌───────────────────  STATS  ───────────────────┐");
+        System.out.println("Rounds played: " + roundsPlayed);
+        System.out.println("Your score: " + playerPointsRealtime);
+        System.out.println("The AI's score: " + AIPointsRealtime);
+        System.out.println("────────────────────────────────────────────────");
+        System.out.println("You cooperated " + playerCooperateTally + " times.");
+        System.out.println("You defected " + playerDefectTally + " times.");
+        System.out.println("The AI cooperated " + AICooperateTally + " times.");
+        System.out.println("The AI defected " + AIDefectTally + " times.");
+        System.out.println("────────────────────────────────────────────────");
 
-            if (userContinuer()) return;
-        }
+        double playerAvg = (roundsPlayed > 0) ? (double) playerPointsRealtime / roundsPlayed : 0.0;
+        double aiAvg = (roundsPlayed > 0) ? (double) AIPointsRealtime / roundsPlayed : 0.0;
+
+        System.out.printf("You scored an average of %.1f points per round.%n", playerAvg);
+        System.out.printf("The AI scored an average of %.1f points per round.%n", aiAvg);
+
+        System.out.println("└───────────────────────────────────────────────┘");
+
+        userContinuer();
     }
 
     public void gameResults() {
@@ -254,6 +261,8 @@ public class PrisonersDilemma {
             System.out.println();
             System.out.println(AIPointsRealtime + " - " + playerPointsRealtime);  
         }
+
+        userContinuer();
     }
 
     public void AIChooser(int round) {
@@ -269,6 +278,12 @@ public class PrisonersDilemma {
                 break;
             case 3:
                 grimTrigger(round);
+                break;
+            case 4:
+                winStayLoseShift(round);
+                break;
+            case 5:
+                titForTwoTats(round);
                 break;
         }
     }
@@ -313,6 +328,44 @@ public class PrisonersDilemma {
         }
     }
 
+    public void winStayLoseShift(int round) {
+        // cooperate first, then:
+        if (round == 0) {
+            AIHistory[round] = "c";
+        } else { 
+
+            int lastAIPoints = AIPointsHistory[round - 1];
+            String lastAIMove = AIHistory[round - 1];
+
+            // If the AI got 3 or more points last round, repeat last move; else flip it.
+            if (lastAIPoints >= 3) {
+                // good outcome last round
+                AIHistory[round] = lastAIMove; // repeat
+            } else {
+                // bad outcome last round
+                if (lastAIMove.equals("d")) {
+                    AIHistory[round] = "c";
+                } else {
+                    AIHistory[round] = "d";
+                }
+            }
+        }
+    }
+
+    public void titForTwoTats(int round) {
+        // cooperate first, then defect only after back-to-back defections
+        if (round<2) {
+            AIHistory[round] = "c";
+        } else {
+            playerDefectedLastTwo =  playerHistory[round - 1].equals("d") && playerHistory[round - 2].equals("d");
+            if (playerDefectedLastTwo) {
+                AIHistory[round] = "d";
+            } else {
+                AIHistory[round] = "c";
+            }
+        }
+    }
+
     public void alwaysDefect(int round) {
         // A strategy that always defects
         AIHistory[round] = "d";
@@ -351,89 +404,78 @@ public class PrisonersDilemma {
     }
 
     public void roundComplete(int round) {
-        while(true) {
-            System.out.println("Round " + (round+1) + " results:");
-            System.out.println();
+        System.out.println("Round " + (round+1) + " results:");
+        System.out.println();
 
-            if(playerHistory[round].equals("c")) { // player history
-                System.out.println("You cooperated: " + "+" + playerPointsHistory[round] + " points"); // if player cooperated
-            } else {
-                System.out.println("You defected: " + "+" + playerPointsHistory[round] + " points"); // if player defected
-            }
-
-            if(AIHistory[round].equals("c")) { // ai history
-                System.out.println("The AI cooperated: " + "+" + AIPointsHistory[round] + " points"); // if ai cooperated
-            } else {
-                System.out.println("The AI defected: " + "+" + AIPointsHistory[round] + " points"); // if player defected
-            }
-
-            if (userContinuer()) return;
+        if(playerHistory[round].equals("c")) { // player history
+            System.out.println("You cooperated: " + "+" + playerPointsHistory[round] + " points"); // if player cooperated
+        } else {
+            System.out.println("You defected: " + "+" + playerPointsHistory[round] + " points"); // if player defected
         }
+
+        if(AIHistory[round].equals("c")) { // ai history
+            System.out.println("The AI cooperated: " + "+" + AIPointsHistory[round] + " points"); // if ai cooperated
+        } else {
+            System.out.println("The AI defected: " + "+" + AIPointsHistory[round] + " points"); // if player defected
+        }
+
+        userContinuer();
     }
 
     public void showHistory(int round) {
-        while (true) {
-            if (round == 0) { // if its still the first round
-                System.out.println("There is no history yet! Maybe check back later?");
-            } else {
-                System.out.println("Round History:");
-                System.out.println();
-                for(int x=0; x<round; x++ ) { // loop through played rounds
-                    System.out.println("Round " + (x+1) + ":");
-                    if(playerHistory[x].equals("c")) { // player history
-                        System.out.println("You cooperated: " + "+" + playerPointsHistory[x] + " points"); // if player cooperated
-                    } else {
-                        System.out.println("You defected: " + "+" + playerPointsHistory[x] + " points"); // if player defected
-                    }
-
-                    if(AIHistory[x].equals("c")) { // ai history
-                        System.out.println("The AI cooperated: " + "+" + AIPointsHistory[x] + " points"); // if ai cooperated
-                    } else {
-                        System.out.println("The AI defected: " + "+" + AIPointsHistory[x] + " points"); // if player defected
-                    }
-                    System.out.println();
+        if (round == 0) { // if its still the first round
+            System.out.println("There is no history yet! Maybe check back later?");
+        } else {
+            System.out.println("Round History:");
+            System.out.println();
+            for(int x=0; x<round; x++ ) { // loop through played rounds
+                System.out.println("Round " + (x+1) + ":");
+                if(playerHistory[x].equals("c")) { // player history
+                    System.out.println("You cooperated: " + "+" + playerPointsHistory[x] + " points"); // if player cooperated
+                } else {
+                    System.out.println("You defected: " + "+" + playerPointsHistory[x] + " points"); // if player defected
                 }
+
+                if(AIHistory[x].equals("c")) { // ai history
+                    System.out.println("The AI cooperated: " + "+" + AIPointsHistory[x] + " points"); // if ai cooperated
+                } else {
+                    System.out.println("The AI defected: " + "+" + AIPointsHistory[x] + " points"); // if player defected
+                }
+                System.out.println();
             }
-            if (userContinuer()) return;
         }
+        userContinuer();
     }
 
     public void instructions() {
-        while (true) {
+        System.out.println("How to play:");
+        System.out.println();
+        System.out.println("You and the AI will play a random number of rounds (5 to 15).");
+        System.out.println("On each round choose: [c] cooperate, or [d] defect.");
+        System.out.println("Open help at any time with [g] game theory or [i] instructions.");
+        System.out.println("View what has happened so far with [h] history.");
+        System.out.println("To quit, press [q] and confirm when asked.");
+        System.out.println("Aim for the best total by thinking about the long term.");
 
-            System.out.println("Welcome to a Prisoner's Dilemma recreation!");
-            System.out.println();
-            System.out.println("You and the AI have both been arrested. Each round, you must choose to 'cooperate' or 'defect'.");
-            System.out.println("If you both cooperate, you both get 3 points. If you both defect, you both get 1 point.");
-            System.out.println("If one defects and the other cooperates, the defector gets 5 points, and the cooperator gets 0.");
-            System.out.println("Each round, enter your choice: type 'C' to cooperate or 'D' to defect.");
-            System.out.println("The game will run for a random number of rounds (between 5 and 15).");
-            System.out.println("Your goal is to score as many points as possible over all rounds.");
-            System.out.println("To quit the game early, type 'Q' at any time.");
-            System.out.println("You will be able to see round history before you make your decisions.");
-            System.out.println("The game begins now. Good luck!");
-
-            if (userContinuer()) return;
-        }
+        userContinuer();
     }
 
     public void gameTheory() {
-        while (true) {
-            System.out.println("Game theory:");
-            System.out.println();
-            System.out.println("The Prisoner's Dilemma is a classic game theory scenario where two players must decide");
-            System.out.println("independently whether to cooperate or defect, without knowing the other's choice.");
-            System.out.println("While mutual cooperation leads to a better outcome for both, the temptation to betray");
-            System.out.println("for personal gain often leads to worse results overall. This dilemma highlights the");
-            System.out.println("conflict between individual rationality and collective benefit.");
+        System.out.println("Game theory:");
+        System.out.println();
+        System.out.println("The Prisoner's Dilemma is a classic example in game theory.");
+        System.out.println("Two players choose, without talking, to cooperate or to defect.");
+        System.out.println("If both cooperate, both do well. If both defect, both do only a little.");
+        System.out.println("If one defects while the other cooperates, the defector does best.");
+        System.out.println("Over repeated rounds, trust can raise the score for both players.");
 
-            if (userContinuer()) return;
-        }
+        userContinuer();
     }
 
     public void resetGameState() {
         playerPointsRealtime = 0;
         AIPointsRealtime = 0;
+        roundsPlayed = 0;
         grimTriggered = false;
         playerCooperateTally = 0;
         playerDefectTally = 0;
@@ -441,25 +483,11 @@ public class PrisonersDilemma {
         AIDefectTally = 0;
     }
 
-    public boolean userContinuer() {
+    public void userContinuer() {
         System.out.println();
-        System.out.println("Press [i] to continue.");
-        try {
-            if (keyboard.nextLine().toLowerCase().equals("i")) { // if user continues, move on
-                invalidInput = false;
-                clearScreen();
-                return true;
-            } else { // if text input other than i
-                clearScreen();
-                System.out.println("Invalid entry.");
-                return false;
-            }
-        } catch (Exception e) { // if invalid input (such as a number)
-            clearScreen();
-            System.out.println("Invalid entry.");
-            keyboard.nextLine(); // clear buffer
-            return false;
-        }
+        System.out.println("Press [ENTER] to continue.");
+        keyboard.nextLine();
+        clearScreen();
     }
 
     public void clearScreen() {
